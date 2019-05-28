@@ -490,6 +490,24 @@ def unicode_contains(a, b):
         return contains_impl
 
 
+@overload_method(types.UnicodeType, 'partition')
+def unicode_partition(str, sep):
+    if isinstance(sep, types.UnicodeType):
+        def partition_impl(str, sep):
+            separator_len = len(sep)
+            if separator_len == 0:
+                raise ValueError('empty separator')
+            position = _find(sep, str)
+            # If we have found substring in string
+            if position > -1:
+                last_position = position + separator_len
+                return str[0:position], sep, str[last_position:]
+            else:
+                return str, '', ''
+
+        return partition_impl
+
+
 @overload_method(types.UnicodeType, 'find')
 def unicode_find(a, b):
     if isinstance(b, types.UnicodeType):
