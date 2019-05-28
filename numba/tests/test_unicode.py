@@ -201,6 +201,10 @@ def literal_iter_stopiteration_usecase():
         next(i)
 
 
+def partition_usecase(s, sep):
+    return s.partition(sep)
+
+
 class BaseTest(MemoryLeakMixin, TestCase):
     def setUp(self):
         super(BaseTest, self).setUp()
@@ -892,6 +896,27 @@ class TestUnicode(BaseTest):
             args = [a]
             self.assertEqual(pyfunc(*args), cfunc(*args),
                              msg='failed on {}'.format(args))
+
+    def test_partition_str(self):
+
+        STR_CASES = [
+            ('telemetria', 't'),
+            ('telemetria', 'telemetria'),
+            ('telemetria', 'tt'),
+            ('telemetria', 'ia'),
+            ('telemetria', 'eme'),
+            ('telemetria', '!@#$@#'),
+            ('', 't'),
+            ('', ' '),
+            ('  ', ' ')
+        ]
+
+        pyfunc = partition_usecase
+        cfunc = njit(pyfunc)
+
+        for string, sep in STR_CASES:
+            self.assertEqual(pyfunc(string, sep),
+                             cfunc(string, sep))
 
 
 @unittest.skipUnless(_py34_or_later,
