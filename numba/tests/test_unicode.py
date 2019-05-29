@@ -898,7 +898,6 @@ class TestUnicode(BaseTest):
                              msg='failed on {}'.format(args))
 
     def test_partition_str(self):
-
         STR_CASES = [
             ('telemetria', 't'),
             ('telemetria', 'telemetria'),
@@ -917,6 +916,16 @@ class TestUnicode(BaseTest):
         for string, sep in STR_CASES:
             self.assertEqual(pyfunc(string, sep),
                              cfunc(string, sep))
+
+    def test_partition_empty_separator(self):
+        self.disable_leak_check()
+        pyfunc = partition_usecase
+        cfunc = njit(pyfunc)
+        # Handle empty separator exception
+        for func in [pyfunc, cfunc]:
+            with self.assertRaises(ValueError) as raises:
+                func('test', '')
+            self.assertIn('empty separator', str(raises.exception))
 
 
 @unittest.skipUnless(_py34_or_later,
